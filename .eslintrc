@@ -1,0 +1,26 @@
+{
+  "parser": "babel-eslint",
+  "plugins": [
+    "react",
+    "jsx-a11y",
+    "import"
+  ],
+  "rules": {
+    "linebreak-style": ["error", "windows"],
+    "react/jsx-uses-vars": 1,
+    "comma-dangle": ["error", {"functions": "ignore"}],
+    "no-underscore-dangle": ["error", { "allow": ["_this"] }]
+  },
+  "extends": ["airbnb-base"],
+  "env": {
+    "browser": true,
+    "node": true
+  },
+  "settings": {
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx"]
+      }
+    }
+  }
+}
