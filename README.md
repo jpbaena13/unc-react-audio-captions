@@ -10,9 +10,14 @@ import { AudioCaptions, Caption } from 'unc-react-audio-captions';
 import 'animate.css/animate.min.css';
 
 render(
-  <AudioCaptions src="audio.mp3" controls>
+  <AudioCaptions src="audio.mp3" controls autoPlay>
     <Caption start="2">
       Caption starting in second 2
+      <div>
+        <Caption start="4">
+          Embedded Caption
+        </Caption>
+      </div>
     </Caption>
 
     <Caption start="3" animation="rotateIn">

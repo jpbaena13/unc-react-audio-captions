@@ -7,6 +7,10 @@ exports.default = void 0;
 
 var _react = _interopRequireDefault(require("react"));
 
+var _classnames = _interopRequireDefault(require("classnames"));
+
+var _Caption = _interopRequireDefault(require("./Caption"));
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
@@ -35,6 +39,8 @@ function _setPrototypeOf(o, p) { _setPrototypeOf = Object.setPrototypeOf || func
 
 function _assertThisInitialized(self) { if (self === void 0) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return self; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 var AudioCaptions =
 /*#__PURE__*/
 function (_React$Component) {
@@ -46,46 +52,33 @@ function (_React$Component) {
     _classCallCheck(this, AudioCaptions);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AudioCaptions).call(this, props));
-    _this.onTimeUpdate = _this.onTimeUpdate.bind(_assertThisInitialized(_assertThisInitialized(_this)));
-    _this.state = {
-      captionsStarted: [],
-      captionsEnded: []
-    };
-    return _this;
-  }
-  /**
-   * Lifecycle
-   */
 
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "playAudio", function () {
+      _this.audio.play();
+    });
 
-  _createClass(AudioCaptions, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      this.audio.ontimeupdate = this.onTimeUpdate;
-      this.audio.play();
-    }
-    /**
-     * Checks the start and end time for each caption and updates the state to the app
-     * with the captions to show.
-     */
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "pauseAudio", function () {
+      _this.audio.pause();
+    });
 
-  }, {
-    key: "onTimeUpdate",
-    value: function onTimeUpdate() {
-      var audio = this.audio;
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "onTimeUpdate", function () {
+      var _assertThisInitialize = _assertThisInitialized(_assertThisInitialized(_this)),
+          audio = _assertThisInitialize.audio;
 
-      var captionsStarted = _toConsumableArray(this.state.captionsStarted);
+      var captionsStarted = _toConsumableArray(_this.state.captionsStarted);
 
-      var captionsEnded = _toConsumableArray(this.state.captionsEnded);
+      var captionsEnded = _toConsumableArray(_this.state.captionsEnded);
 
+      var isVisible = _this.state.isVisible;
       var update = false;
-      this.props.children.forEach(function (caption, idx) {
-        var idxStarted = captionsStarted.indexOf(idx);
-        var idxEnded = captionsEnded.indexOf(idx);
+
+      _this.captions.forEach(function (caption) {
+        var idxStarted = captionsStarted.indexOf(caption.key);
+        var idxEnded = captionsEnded.indexOf(caption.key);
 
         if (caption.props.start <= parseInt(audio.currentTime, 10)) {
           if (idxStarted === -1) {
-            update = captionsStarted.push(idx);
+            update = captionsStarted.push(caption.key);
           }
 
           if (!caption.props.end || caption.props.end >= parseInt(audio.currentTime, 10)) {
@@ -93,7 +86,7 @@ function (_React$Component) {
               update = captionsEnded.splice(idxEnded, 1);
             }
           } else if (idxEnded === -1) {
-            update = captionsEnded.push(idx);
+            update = captionsEnded.push(caption.key);
           }
         } else {
           if (idxStarted !== -1) {
@@ -106,42 +99,96 @@ function (_React$Component) {
         }
       });
 
+      if (!isVisible && _this.props.start < parseInt(audio.currentTime, 10)) {
+        isVisible = true;
+        update = true;
+      }
+
       if (update) {
-        this.setState({
+        _this.setState({
           captionsStarted: captionsStarted,
-          captionsEnded: captionsEnded
+          captionsEnded: captionsEnded,
+          isVisible: isVisible
         });
       }
+    });
+
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "renderCaptions", function (child, idx) {
+      if (!child.props || !child.props.children) return child;
+      var className = (0, _classnames.default)({
+        animated: child.type === _Caption.default
+      });
+      var children = child.props.children;
+
+      if (_this.state.captionsStarted.indexOf(idx) !== -1) {
+        className = (0, _classnames.default)('animated', child.props.animation);
+      }
+
+      if (children.map) {
+        children = children.map(function (item, ix) {
+          return _this.renderCaptions(item, "".concat(idx, "_").concat(ix));
+        });
+      } else {
+        children = _this.renderCaptions(children, "".concat(idx, "_0"));
+      }
+
+      var el = _react.default.cloneElement(child, {
+        key: idx,
+        children: children,
+        className: className
+      });
+
+      if (_this.initCaptions && child.type === _Caption.default) _this.captions.push(el);
+
+      if (_this.state.captionsEnded.indexOf(idx) !== -1 || _this.state.captionsStarted.indexOf(idx) === -1 && child.props.noDisplay) {
+        return null;
+      }
+
+      return el;
+    });
+
+    _this.state = {
+      captionsStarted: [],
+      captionsEnded: [],
+      isVisible: !props.start || props.start <= 0
+    };
+    _this.captions = [];
+    _this.initCaptions = true;
+    return _this;
+  }
+  /**
+   * Lifecycle
+   */
+
+
+  _createClass(AudioCaptions, [{
+    key: "componentDidMount",
+    value: function componentDidMount() {
+      this.audio.ontimeupdate = this.onTimeUpdate;
+      this.initCaptions = false;
+      if (this.props.autoPlay) this.audio.play();
     }
     /**
-     * Render method
+     * Plays the audio
      */
 
   }, {
     key: "render",
+
+    /**
+     * Render method
+     */
     value: function render() {
       var _this2 = this;
 
+      var className = (0, _classnames.default)('unc-captions', this.props.className, _defineProperty({
+        animated: this.props.start
+      }, "".concat(this.props.animation), this.props.start && this.state.isVisible));
       return _react.default.createElement("div", {
-        className: "unc-captions"
-      }, this.props.children.map(function (caption, idx) {
-        var className = 'animated';
-
-        if (_this2.state.captionsStarted.indexOf(idx) !== -1) {
-          className += " ".concat(caption.props.animation);
-
-          if (_this2.state.captionsEnded.indexOf(idx) !== -1) {
-            return null;
-          }
-        } else if (caption.props.noDisplay) {
-          return null;
-        }
-
-        return _react.default.cloneElement(caption, {
-          key: idx,
-          className: className
-        });
-      }), _react.default.createElement("audio", {
+        className: className
+      }, this.props.children.map && this.props.children.map(function (child, idx) {
+        return _this2.renderCaptions(child, "".concat(idx));
+      }) || this.renderCaptions(this.props.children, '0'), _react.default.createElement("audio", {
         src: this.props.src,
         controls: this.props.controls,
         autoPlay: this.props.autoPlay,
@@ -155,5 +202,8 @@ function (_React$Component) {
   return AudioCaptions;
 }(_react.default.Component);
 
+AudioCaptions.defaultProps = {
+  animation: 'bounceInRight'
+};
 var _default = AudioCaptions;
 exports.default = _default;

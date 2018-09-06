@@ -13,13 +13,15 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 /* eslint-enable no-unused-vars */
 var Caption = function Caption(props) {
-  return _react.default.createElement("div", {
-    className: props.className
-  }, props.children);
+  return _react.default.createElement(props.tagName, {
+    className: props.className,
+    children: props.children
+  });
 };
 
 Caption.defaultProps = {
-  animation: 'bounceInRight'
+  animation: 'bounceInRight',
+  tagName: 'div'
 };
 var _default = Caption;
 exports.default = _default;

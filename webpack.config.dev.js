@@ -6,6 +6,9 @@ module.exports = {
     path: path.resolve(__dirname, 'example/dist'),
     filename: 'unc-react-audio-captions.js'
   },
+  devServer: {
+    port: 9001
+  },
   module: {
     rules: [
       {
