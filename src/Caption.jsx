@@ -3,13 +3,15 @@ import React from 'react';
 /* eslint-enable no-unused-vars */
 
 const Caption = props => (
-  <div className={props.className}>
-    {props.children}
-  </div>
+  React.createElement(props.tagName, {
+    className: props.className,
+    children: props.children
+  })
 );
 
 Caption.defaultProps = {
-  animation: 'bounceInRight'
+  animation: 'bounceInRight',
+  tagName: 'div'
 };
 
 export default Caption;
