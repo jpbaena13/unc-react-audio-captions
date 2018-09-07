@@ -51,7 +51,7 @@ function App() {
           Caption 4
         </Caption>
 
-        <Caption start="7">
+        <Caption start="7" end="9">
           <h2>Caption 5</h2>
         </Caption>
 

@@ -2,12 +2,59 @@
 import React from 'react';
 /* eslint-enable no-unused-vars */
 
-const Caption = props => (
-  React.createElement(props.tagName, {
-    className: props.className,
-    children: props.children
-  })
-);
+import classNames from 'classnames';
+
+class Caption extends React.Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      classname: 'animated',
+      noDisplay: false
+    };
+
+    this.props.listeners.push(this.onListener);
+  }
+
+  /**
+   * This functions is added to parent's listeners array.
+   * Update the state of the component according its props.
+   *
+   * @param  {int} currentTime Audio current time from parent.
+   */
+  onListener = (currentTime) => {
+    if (this.props.start < currentTime) {
+      this.setState({
+        classname: classNames('animated', this.props.animation)
+      });
+    }
+
+    if ((this.props.end && this.props.end < currentTime)
+        || (this.props.start >= currentTime && this.props.noDisplay)) {
+      this.setState({
+        noDisplay: true
+      });
+    } else if (this.state.noDisplay) {
+      this.setState({
+        noDisplay: false
+      });
+    }
+  }
+
+  /**
+   * Render method.
+   */
+  render() {
+    if (this.state.noDisplay) return null;
+
+    return (
+      React.createElement(this.props.tagName, {
+        className: this.state.classname,
+        children: this.props.children
+      })
+    );
+  }
+}
 
 Caption.defaultProps = {
   animation: 'bounceInRight',

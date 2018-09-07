@@ -15,14 +15,6 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _typeof(obj) { if (typeof Symbol === "function" && typeof Symbol.iterator === "symbol") { _typeof = function _typeof(obj) { return typeof obj; }; } else { _typeof = function _typeof(obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; }; } return _typeof(obj); }
 
-function _toConsumableArray(arr) { return _arrayWithoutHoles(arr) || _iterableToArray(arr) || _nonIterableSpread(); }
-
-function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance"); }
-
-function _iterableToArray(iter) { if (Symbol.iterator in Object(iter) || Object.prototype.toString.call(iter) === "[object Arguments]") return Array.from(iter); }
-
-function _arrayWithoutHoles(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = new Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } }
-
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } }
@@ -53,7 +45,9 @@ function (_React$Component) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AudioCaptions).call(this, props));
 
-    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "playAudio", function () {
+    _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "playAudio", function (currentTime) {
+      if (currentTime) _this.audio.currentTime = currentTime;
+
       _this.audio.play();
     });
 
@@ -65,64 +59,24 @@ function (_React$Component) {
       var _assertThisInitialize = _assertThisInitialized(_assertThisInitialized(_this)),
           audio = _assertThisInitialize.audio;
 
-      var captionsStarted = _toConsumableArray(_this.state.captionsStarted);
+      var currentTime = parseInt(audio.currentTime, 10);
 
-      var captionsEnded = _toConsumableArray(_this.state.captionsEnded);
-
-      var isVisible = _this.state.isVisible;
-      var update = false;
-
-      _this.captions.forEach(function (caption) {
-        var idxStarted = captionsStarted.indexOf(caption.key);
-        var idxEnded = captionsEnded.indexOf(caption.key);
-
-        if (caption.props.start <= parseInt(audio.currentTime, 10)) {
-          if (idxStarted === -1) {
-            update = captionsStarted.push(caption.key);
-          }
-
-          if (!caption.props.end || caption.props.end >= parseInt(audio.currentTime, 10)) {
-            if (idxEnded !== -1) {
-              update = captionsEnded.splice(idxEnded, 1);
-            }
-          } else if (idxEnded === -1) {
-            update = captionsEnded.push(caption.key);
-          }
-        } else {
-          if (idxStarted !== -1) {
-            update = captionsStarted.splice(idxStarted, 1);
-          }
-
-          if (idxEnded !== -1) {
-            update = captionsEnded.splice(idxEnded, 1);
-          }
-        }
+      _this.listeners.forEach(function (callback) {
+        callback(currentTime);
       });
 
-      if (!isVisible && _this.props.start < parseInt(audio.currentTime, 10)) {
-        isVisible = true;
-        update = true;
-      }
+      if (_this.props.onTimeUpdate) _this.props.onTimeUpdate(currentTime);
 
-      if (update) {
+      if (!_this.state.isVisible && _this.props.start < parseInt(audio.currentTime, 10)) {
         _this.setState({
-          captionsStarted: captionsStarted,
-          captionsEnded: captionsEnded,
-          isVisible: isVisible
+          isVisible: true
         });
       }
     });
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "renderCaptions", function (child, idx) {
       if (!child.props || !child.props.children) return child;
-      var className = (0, _classnames.default)({
-        animated: child.type === _Caption.default
-      });
       var children = child.props.children;
-
-      if (_this.state.captionsStarted.indexOf(idx) !== -1) {
-        className = (0, _classnames.default)('animated', child.props.animation);
-      }
 
       if (children.map) {
         children = children.map(function (item, ix) {
@@ -132,28 +86,17 @@ function (_React$Component) {
         children = _this.renderCaptions(children, "".concat(idx, "_0"));
       }
 
-      var el = _react.default.cloneElement(child, {
+      return _react.default.cloneElement(child, {
         key: idx,
         children: children,
-        className: className
+        listeners: child.type === _Caption.default ? _this.listeners : undefined
       });
-
-      if (_this.initCaptions && child.type === _Caption.default) _this.captions.push(el);
-
-      if (_this.state.captionsEnded.indexOf(idx) !== -1 || _this.state.captionsStarted.indexOf(idx) === -1 && child.props.noDisplay) {
-        return null;
-      }
-
-      return el;
     });
 
     _this.state = {
-      captionsStarted: [],
-      captionsEnded: [],
       isVisible: !props.start || props.start <= 0
     };
-    _this.captions = [];
-    _this.initCaptions = true;
+    _this.listeners = [];
     return _this;
   }
   /**
@@ -165,11 +108,11 @@ function (_React$Component) {
     key: "componentDidMount",
     value: function componentDidMount() {
       this.audio.ontimeupdate = this.onTimeUpdate;
-      this.initCaptions = false;
-      if (this.props.autoPlay) this.audio.play();
     }
     /**
      * Plays the audio
+     *
+     * @param {int} currentTime Indicates the position for the playback in seconds.
      */
 
   }, {

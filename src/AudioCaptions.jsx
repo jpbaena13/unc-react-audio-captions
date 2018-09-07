@@ -8,13 +8,10 @@ class AudioCaptions extends React.Component {
     super(props);
 
     this.state = {
-      captionsStarted: [],
-      captionsEnded: [],
       isVisible: !props.start || props.start <= 0
     };
 
-    this.captions = [];
-    this.initCaptions = true;
+    this.listeners = [];
   }
 
   /**
@@ -22,15 +19,15 @@ class AudioCaptions extends React.Component {
    */
   componentDidMount() {
     this.audio.ontimeupdate = this.onTimeUpdate;
-    this.initCaptions = false;
-
-    if (this.props.autoPlay) this.audio.play();
   }
 
   /**
    * Plays the audio
+   *
+   * @param {int} currentTime Indicates the position for the playback in seconds.
    */
-  playAudio = () => {
+  playAudio = (currentTime) => {
+    if (currentTime) this.audio.currentTime = currentTime;
     this.audio.play();
   }
 
@@ -42,53 +39,21 @@ class AudioCaptions extends React.Component {
   }
 
   /**
-   * Checks the start and end time for each caption and updates the state to the app
-   * with the captions to show.
+   * Runs every callback function added from children with type 'Caption'.
    */
   onTimeUpdate = () => {
     const { audio } = this;
-    const captionsStarted = [...this.state.captionsStarted];
-    const captionsEnded = [...this.state.captionsEnded];
-    let { isVisible } = this.state;
-    let update = false;
+    const currentTime = parseInt(audio.currentTime, 10);
 
-    this.captions.forEach((caption) => {
-      const idxStarted = captionsStarted.indexOf(caption.key);
-      const idxEnded = captionsEnded.indexOf(caption.key);
-
-      if (caption.props.start <= parseInt(audio.currentTime, 10)) {
-        if (idxStarted === -1) {
-          update = captionsStarted.push(caption.key);
-        }
-
-        if (!caption.props.end || caption.props.end >= parseInt(audio.currentTime, 10)) {
-          if (idxEnded !== -1) {
-            update = captionsEnded.splice(idxEnded, 1);
-          }
-        } else if (idxEnded === -1) {
-          update = captionsEnded.push(caption.key);
-        }
-      } else {
-        if (idxStarted !== -1) {
-          update = captionsStarted.splice(idxStarted, 1);
-        }
-
-        if (idxEnded !== -1) {
-          update = captionsEnded.splice(idxEnded, 1);
-        }
-      }
+    this.listeners.forEach((callback) => {
+      callback(currentTime);
     });
 
-    if (!isVisible && this.props.start < parseInt(audio.currentTime, 10)) {
-      isVisible = true;
-      update = true;
-    }
+    if (this.props.onTimeUpdate) this.props.onTimeUpdate(currentTime);
 
-    if (update) {
+    if (!this.state.isVisible && this.props.start < parseInt(audio.currentTime, 10)) {
       this.setState({
-        captionsStarted,
-        captionsEnded,
-        isVisible
+        isVisible: true
       });
     }
   }
@@ -104,12 +69,7 @@ class AudioCaptions extends React.Component {
   renderCaptions = (child, idx) => {
     if (!child.props || !child.props.children) return child;
 
-    let className = classNames({ animated: child.type === Caption });
     let { children } = child.props;
-
-    if (this.state.captionsStarted.indexOf(idx) !== -1) {
-      className = classNames('animated', child.props.animation);
-    }
 
     if (children.map) {
       children = children.map((item, ix) => this.renderCaptions(item, `${idx}_${ix}`));
@@ -117,20 +77,11 @@ class AudioCaptions extends React.Component {
       children = this.renderCaptions(children, `${idx}_0`);
     }
 
-    const el = React.cloneElement(child, {
+    return React.cloneElement(child, {
       key: idx,
       children,
-      className
+      listeners: child.type === Caption ? this.listeners : undefined
     });
-
-    if (this.initCaptions && child.type === Caption) this.captions.push(el);
-
-    if (this.state.captionsEnded.indexOf(idx) !== -1
-        || (this.state.captionsStarted.indexOf(idx) === -1 && child.props.noDisplay)) {
-      return null;
-    }
-
-    return el;
   }
 
   /**
