@@ -4,7 +4,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-class Caption extends React.Component {
+class Caption extends React.PureComponent {
   constructor(props) {
     super(props);
 
@@ -23,9 +23,15 @@ class Caption extends React.Component {
    * @param  {int} currentTime Audio current time from parent.
    */
   onListener = (currentTime) => {
-    if (this.props.start < currentTime) {
+    if (this.props.start < currentTime && this.state.classname === 'animated') {
       this.setState({
-        classname: classNames('animated', this.props.animation)
+        classname: classNames('animated', this.props.animation),
+        noDisplay: false
+      });
+    } else if (this.props.start >= currentTime && this.state.classname !== 'animated') {
+      this.setState({
+        classname: 'animated',
+        noDisplay: false
       });
     }
 

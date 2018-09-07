@@ -33,8 +33,8 @@ function _defineProperty(obj, key, value) { if (key in obj) { Object.definePrope
 
 var Caption =
 /*#__PURE__*/
-function (_React$Component) {
-  _inherits(Caption, _React$Component);
+function (_React$PureComponent) {
+  _inherits(Caption, _React$PureComponent);
 
   function Caption(props) {
     var _this;
@@ -44,9 +44,15 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Caption).call(this, props));
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "onListener", function (currentTime) {
-      if (_this.props.start < currentTime) {
+      if (_this.props.start < currentTime && _this.state.classname === 'animated') {
         _this.setState({
-          classname: (0, _classnames.default)('animated', _this.props.animation)
+          classname: (0, _classnames.default)('animated', _this.props.animation),
+          noDisplay: false
+        });
+      } else if (_this.props.start >= currentTime && _this.state.classname !== 'animated') {
+        _this.setState({
+          classname: 'animated',
+          noDisplay: false
         });
       }
 
@@ -94,7 +100,7 @@ function (_React$Component) {
   }]);
 
   return Caption;
-}(_react.default.Component);
+}(_react.default.PureComponent);
 
 Caption.defaultProps = {
   animation: 'bounceInRight',
