@@ -56,7 +56,7 @@ function (_React$PureComponent) {
         });
       }
 
-      if (_this.props.end && _this.props.end < currentTime || _this.props.start > currentTime && _this.props.noDisplay) {
+      if (_this.props.end && _this.props.end <= currentTime || _this.props.start > currentTime && _this.props.noDisplay) {
         _this.setState({
           noDisplay: true
         });

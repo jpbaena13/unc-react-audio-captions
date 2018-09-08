@@ -35,7 +35,7 @@ class Caption extends React.PureComponent {
       });
     }
 
-    if ((this.props.end && this.props.end < currentTime)
+    if ((this.props.end && this.props.end <= currentTime)
         || (this.props.start > currentTime && this.props.noDisplay)) {
       this.setState({
         noDisplay: true
