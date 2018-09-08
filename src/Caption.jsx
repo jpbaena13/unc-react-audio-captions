@@ -23,12 +23,12 @@ class Caption extends React.PureComponent {
    * @param  {int} currentTime Audio current time from parent.
    */
   onListener = (currentTime) => {
-    if (this.props.start < currentTime && this.state.classname === 'animated') {
+    if (this.props.start <= currentTime && this.state.classname === 'animated') {
       this.setState({
         classname: classNames('animated', this.props.animation),
         noDisplay: false
       });
-    } else if (this.props.start >= currentTime && this.state.classname !== 'animated') {
+    } else if (this.props.start > currentTime && this.state.classname !== 'animated') {
       this.setState({
         classname: 'animated',
         noDisplay: false
@@ -36,7 +36,7 @@ class Caption extends React.PureComponent {
     }
 
     if ((this.props.end && this.props.end < currentTime)
-        || (this.props.start >= currentTime && this.props.noDisplay)) {
+        || (this.props.start > currentTime && this.props.noDisplay)) {
       this.setState({
         noDisplay: true
       });

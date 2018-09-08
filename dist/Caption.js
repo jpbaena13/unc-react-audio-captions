@@ -44,19 +44,19 @@ function (_React$PureComponent) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Caption).call(this, props));
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "onListener", function (currentTime) {
-      if (_this.props.start < currentTime && _this.state.classname === 'animated') {
+      if (_this.props.start <= currentTime && _this.state.classname === 'animated') {
         _this.setState({
           classname: (0, _classnames.default)('animated', _this.props.animation),
           noDisplay: false
         });
-      } else if (_this.props.start >= currentTime && _this.state.classname !== 'animated') {
+      } else if (_this.props.start > currentTime && _this.state.classname !== 'animated') {
         _this.setState({
           classname: 'animated',
           noDisplay: false
         });
       }
 
-      if (_this.props.end && _this.props.end < currentTime || _this.props.start >= currentTime && _this.props.noDisplay) {
+      if (_this.props.end && _this.props.end < currentTime || _this.props.start > currentTime && _this.props.noDisplay) {
         _this.setState({
           noDisplay: true
         });
