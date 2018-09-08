@@ -51,12 +51,11 @@ class Caption extends React.PureComponent {
    * Render method.
    */
   render() {
-    if (this.state.noDisplay) return null;
-
     return (
       React.createElement(this.props.tagName, {
         className: this.state.classname,
-        children: this.props.children
+        children: this.props.children,
+        style: { display: this.state.noDisplay && 'none' }
       })
     );
   }

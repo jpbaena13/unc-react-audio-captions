@@ -34,7 +34,7 @@ function App() {
           </Caption>
         </Caption>
 
-        <Caption start="3" animation="rotateIn" tagName='span'>
+        <Caption start="3" animation="rotateIn" tagName='span' noDisplay>
           <h2>Caption 2</h2>
           <span>
             <Caption start='4'>
