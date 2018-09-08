@@ -27,7 +27,7 @@ class AudioCaptions extends React.Component {
    * @param {int} currentTime Indicates the position for the playback in seconds.
    */
   playAudio = (currentTime) => {
-    if (currentTime) this.audio.currentTime = currentTime;
+    if (currentTime !== undefined) this.audio.currentTime = currentTime;
     this.audio.play();
   }
 

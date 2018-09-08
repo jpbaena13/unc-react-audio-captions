@@ -46,7 +46,7 @@ function (_React$Component) {
     _this = _possibleConstructorReturn(this, _getPrototypeOf(AudioCaptions).call(this, props));
 
     _defineProperty(_assertThisInitialized(_assertThisInitialized(_this)), "playAudio", function (currentTime) {
-      if (currentTime) _this.audio.currentTime = currentTime;
+      if (currentTime !== undefined) _this.audio.currentTime = currentTime;
 
       _this.audio.play();
     });
