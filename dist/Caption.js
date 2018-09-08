@@ -91,10 +91,12 @@ function (_React$PureComponent) {
      * Render method.
      */
     value: function render() {
-      if (this.state.noDisplay) return null;
       return _react.default.createElement(this.props.tagName, {
         className: this.state.classname,
-        children: this.props.children
+        children: this.props.children,
+        style: {
+          display: this.state.noDisplay && 'none'
+        }
       });
     }
   }]);
